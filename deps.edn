@@ -1,9 +1,12 @@
-{:paths ["src" "resources"]
+{:paths ["src" "resources" "classes"]
  :deps {org.clojure/clojure {:mvn/version "1.10.3"}}
  :aliases
  {:build {:deps {io.github.seancorfield/build-clj
                  {:git/tag "v0.6.4" :git/sha "c21cfde"}}
           :ns-default build}
+  :guac {:extra-deps {org.apache.guacamole/guacamole-ext {:mvn/version "1.3.0"}
+                      javax.servlet/javax.servlet-api {:mvn/version "3.1.0"}}}
+  :dev {}
   :test {:extra-paths ["test"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       io.github.cognitect-labs/test-runner

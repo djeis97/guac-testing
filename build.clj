@@ -3,27 +3,32 @@
   (:require [clojure.tools.build.api :as b] ; for b/git-count-revs
             [org.corfield.build :as bb]))
 
-(def lib 'net.clojars.site.djei/guac-testing)
-(def version "0.1.0-SNAPSHOT")
-#_ ; alternatively, use MAJOR.MINOR.COMMITS:
-(def version (format "1.0.%s" (b/git-count-revs nil)))
+(def lib 'site.djei/guac-testing)
+#_(def version "0.1.0-SNAPSHOT")
+;; alternatively, use MAJOR.MINOR.COMMITS:
+(def version (format "0.0.%s" (b/git-count-revs nil)))
 
-(defn test "Run the tests." [opts]
-  (bb/run-tests opts))
+(defn rebuild-classes [opts]
+  (b/delete {:path "classes"})
+  (let [comp-basis (b/create-basis {:aliases [:guac]})]
+    (b/javac {:basis comp-basis
+              :src-dirs ["src"]
+              :class-dir "classes"})
+    (b/compile-clj {:ns-compile ['site.djei.guac-testing]
+                    :basis comp-basis
+                    :src-dirs ["src"]
+                    :class-dir "classes"})))
 
-(defn ci "Run the CI pipeline of tests (and build the JAR)." [opts]
-  (-> opts
-      (assoc :lib lib :version version)
-      (bb/run-tests)
-      (bb/clean)
-      (bb/jar)))
-
-(defn install "Install the JAR locally." [opts]
-  (-> opts
-      (assoc :lib lib :version version)
-      (bb/install)))
-
-(defn deploy "Deploy the JAR to Clojars." [opts]
-  (-> opts
-      (assoc :lib lib :version version)
-      (bb/deploy)))
+(defn uber [opts]
+  (b/delete {:path "target"})
+  (rebuild-classes opts)
+  (b/copy-dir {:src-dirs ["src" "resources" "classes"] :target-dir "target/classes"})
+  (let [basis (b/create-basis {})]
+    (b/write-pom {:basis basis
+                  :class-dir "target/classes"
+                  :lib 'site.djei/guac-testing
+                  :version "STANDALONE"})
+    (b/uber {:basis basis
+             :class-dir "target/classes"
+             :conflict-handlers org.corfield.log4j2-conflict-handler/log4j2-conflict-handler
+             :uber-file "target/guac-testing.jar"})))

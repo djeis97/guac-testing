@@ -1,0 +1,11 @@
+{
+    "guacamoleVersion" : "1.3.0",
+    "name" : "Djeisite testing auth extension",
+    "namespace" : "guac-testing-tutorial",
+    "authProviders" : [
+        "site.djei.guac_testing.Authprovider"
+    ],
+    "html" : [
+        "html/showfunkyattr.html"
+    ]
+}
